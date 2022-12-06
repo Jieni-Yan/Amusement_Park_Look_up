@@ -30,11 +30,11 @@ navi = st.sidebar.radio("Navigation", ["UNIROI Home Page", "University/Major Sea
 if navi == "UNIROI Home Page":
     # st.set_page_config(layout="centered", page_icon="🎓", page_title="Diploma Generator")
     # st.title("🎓 Diploma PDF Generator")
-    with open('choice.txt', 'w') as f:
-        f.write('None')
+    # with open('choice.txt', 'w') as f:
+    #     f.write('None')
     
-    image = Image.open('UNIROI.png')
-    st.image(image)
+    # image = Image.open('UNIROI.png')
+    # st.image(image)
 
    
     st.subheader("What is UNIROI?")
