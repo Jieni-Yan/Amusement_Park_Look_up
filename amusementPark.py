@@ -29,6 +29,19 @@ from neo4j import GraphDatabase
 
 
 navi = st.sidebar.radio("Navigation", ["Amusement Park Home Page", "Display", "Loan Repayment Calculator", "Contact Us"])
+# def park_detail():
+#     # cols = st.columns((2,4))
+#     # fields = ["name", 'content']
+#     # for col, field_name in zip(cols, fields):
+#     #     col.write(field_name)
+#     d = {'col1': [1, 2], 'link': ["https://www.kentuckykingdom.com/", "http://beachboardwalk.com/"]}
+#     df = pd.DataFrame(data=d)
+#
+#     #st.dataframe(df)
+#     st.markdown(df.to_html(render_links=True), unsafe_allow_html=True)
+
+
+
 
 if navi == "Amusement Park Home Page":
     # st.set_page_config(layout="centered", page_icon="🎓", page_title="Diploma Generator")
@@ -75,6 +88,16 @@ if navi == "Display":
     st.write("In this page, you can select the amusement park you want to know, and we will show you the top 10 Amusement parks information.")
     # st.image(Image.open("images/uk-charts.png"))
 
+    # page_names_to_funcs = {
+    #     "—": intro,
+    #     "Plotting Demo": plotting_demo,
+    #     "Mapping Demo": mapping_demo,
+    #     "DataFrame Demo": data_frame_demo
+    # }
+    #
+    # demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
+    # page_names_to_funcs[demo_name]()
+
     # with driver.session() as session:
     #     st.subheader("Number 1s")
     #     st.write("The chart below shows the number 1 charting songs of 2019.")
@@ -93,10 +116,57 @@ if navi == "Display":
         # text = link.split('=')[1]
         return f'<a target="_blank" href="{link}"></a>'
 
-
     d = {'col1': [1, 2], 'link': ["https://www.kentuckykingdom.com/", "http://beachboardwalk.com/"]}
     df = pd.DataFrame(data=d)
     # link is the column with hyperlinks
-    df['link'] = df['link'].apply(make_clickable)
-    df = df.to_html(escape=False)
-    st.write(df, unsafe_allow_html=True)
+    # df['link'] = df['link'].apply(make_clickable)
+    # df = df.to_html(escape=False)
+    #st.write(df, unsafe_allow_html=True)
+    colms = st.columns((1,3,1))
+    fields = ["col1", 'link', 'more']
+    for col, field_name in zip(colms, fields):
+        col.write(field_name)
+    # st.write(df[''])
+    for x, email in enumerate(df['col1']):
+        col1, col2, col3= st.columns((1,3,1))
+        #col1.write(x)  # index
+        col1.write(df['col1'][x])  # email
+        col2.write(df['link'][x])  # unique ID
+        # col4.write(df['verified'][x])  # email status
+        # disable_status = df['disabled'][x]  # flexible type of button
+        # button_type = "Unblock" if disable_status else "Block"
+        button_flag = False
+        button_hold = col3.empty()  # create a placeholder
+        do_action = button_hold.button("more", key=x)
+        if do_action & (button_flag is False):
+            button_flag = True
+            d = {'col1': [1, 2], 'link': ["https://www.kentuckykingdom.com/", "http://beachboardwalk.com/"]}
+            df = pd.DataFrame(data=d)
+
+            # st.dataframe(df)
+            st.markdown(df.to_html(render_links=True), unsafe_allow_html=True)
+
+        if do_action & (button_flag is True):
+            button_flag = False
+
+              # do some action with a row's data
+
+
+
+    #button_hold = col3.empty()
+    #do_action = button_hold.button("More", key=x)
+
+    # page_names_to_funcs = {
+    #     "": amusement_park_home_page,
+    #     "Plotting Demo": plotting_demo,
+    #     "Mapping Demo": mapping_demo,
+    #     "DataFrame Demo": data_frame_demo
+    # }
+    #
+    # demo_name = st.sidebar.selectbox("Choose a demo", page_names_to_funcs.keys())
+    # page_names_to_funcs[demo_name]()
+
+    st.dataframe(df)
+    st.markdown(df.to_html(render_links=True), unsafe_allow_html=True)
+    #st.write(df)
+
