@@ -20,14 +20,17 @@ import altair as alt
 # from constants import *
 # from neo4j_controller import Neo4jController
 # import graphviz
+
+from neo4j import GraphDatabase
+
 # key_dict = json.loads(st.secrets["textkey"])
 # creds = service_account.Credentials.from_service_account_info(key_dict)
 # db = firestore.Client(credentials=creds, project="college-return-on-investment")
 
 
-navi = st.sidebar.radio("Navigation", ["UNIROI Home Page", "University/Major Search", "Loan Repayment Calculator", "Contact Us"])
+navi = st.sidebar.radio("Navigation", ["Amusement Park Home Page", "Display", "Loan Repayment Calculator", "Contact Us"])
 
-if navi == "UNIROI Home Page":
+if navi == "Amusement Park Home Page":
     # st.set_page_config(layout="centered", page_icon="🎓", page_title="Diploma Generator")
     # st.title("🎓 Diploma PDF Generator")
     # with open('choice.txt', 'w') as f:
@@ -65,3 +68,36 @@ if navi == "UNIROI Home Page":
 
     st.write("This webpage platform were built by Duyen Nguyen, Kaiyin Chan and Jieni Yan.")
 
+if navi == "Display":
+    #driver = GraphDatabase.driver("bolt://localhost", auth=("neo4j", "neo"))
+
+    st.title("Amusement Park KG")
+    st.write("In this page, you can select the amusement park you want to know, and we will show you the top 10 Amusement parks information.")
+    # st.image(Image.open("images/uk-charts.png"))
+
+    # with driver.session() as session:
+    #     st.subheader("Number 1s")
+    #     st.write("The chart below shows the number 1 charting songs of 2019.")
+    #     result = session.run("""
+    #     MATCH (chart:Chart)<-[inChart:IN_CHART {position: 1}]-(song)-[:ARTIST]->(artist)
+    #     WITH chart, song, collect(artist.name) AS artists
+    #     RETURN toString(chart.end) AS date, song.title AS song, artists
+    #     ORDER BY chart.end
+    #     """)
+    #     df = pd.DataFrame(result.data())
+    #     st.dataframe(df.style.hide_index())
+
+    def make_clickable(link):
+        # target _blank to open new window
+        # extract clickable text to display for your link
+        # text = link.split('=')[1]
+        return f'<a target="_blank" href="{link}"></a>'
+
+
+    d = {'col1': [1, 2], 'link': ["https://www.kentuckykingdom.com/", "http://beachboardwalk.com/"]}
+    df = pd.DataFrame(data=d)
+    # link is the column with hyperlinks
+    df['link'] = df['link'].apply(make_clickable)
+    df = df.to_html(escape=False)
+    st.write(df, unsafe_allow_html=True)
+    
