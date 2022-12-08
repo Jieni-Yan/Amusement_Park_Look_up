@@ -4,6 +4,6 @@ matplotlib
 streamlit_plotly_events
 plotly
 neo4j
-matplotlib
+matplotlib.pyplot
 requests
 cycler

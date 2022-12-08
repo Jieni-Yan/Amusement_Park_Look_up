@@ -5,6 +5,7 @@ from os import major
 import streamlit as st
 import json
 import pandas as pd
+import time
 import plotly.express as px
 import requests
 # import matplotlib.pyplot as plt
@@ -15,9 +16,9 @@ import numpy as np
 # import altair as alt
 
 # import matplotlib.pyplot as plt
-# import plotly.figure_factory as ff
-# import plotly.graph_objects as go
-# import plotly.express as px
+import plotly.figure_factory as ff
+import plotly.graph_objects as go
+import plotly.express as px
 #
 #
 # from constants import *
@@ -216,43 +217,27 @@ park_types = ['All', 'Adventure Park', 'Religious/Spiritual', 'Watersports', 'Es
               'Indoor Park', 'Karting', 'Show', 'Waterpark', 'VR', 'Marine Attraction', 'Attraction - Other',
               'Theme Park', 'Nature/Wildlife', 'FEC', 'Closed', 'Wheel', 'Snow/Ski', 'Trampoline Park',
               'Museum/Historical', 'Botanic Gardens', 'Cultural Attraction', 'Bowling']
-popularity_level = ['All','High', 'middle', 'Low']
+popularity_level = ['All','High', 'Moderate', 'Low']
 brands = ['', 'Topgolf', 'Great Wolf Lodge', 'Disney', 'Sky Zone', 'Madame Tussauds', 'SeaWorld', 'Urban Air', 'Six Flags', "Wet 'N Wild", 'Schlitterbahn', 'Sea Life', 'Eye', 'Lego', 'Dungeons', 'Main Event', 'Universal Studios', 'Cedar Fair', 'Cool de Sac']
 
 if navi == "Amusement Park Home Page":
     # st.set_page_config(layout="centered", page_icon="🎓", page_title="Diploma Generator")
-    # st.title("🎓 Diploma PDF Generator")
+    st.title("🎡 Amusement Park Loop Up")
     # with open('choice.txt', 'w') as f:
     #     f.write('None')
    
     st.subheader("What is Amusement Park Look Up?")
-    st.write("UNIROI is a webpage platform where you can search for your interested colleges and/or majors to see the financial aspect around them. "
-             "The main purpose of this platform is to provide financial information that could help you make decision on which college to go to and/or which major to pursue, "
-             "in another terms, whether your decision is worth it in terms of financial investment.")
+    st.write("Amusement Park Loop-Up is a prototype service that  recommends parks based on your preference. Simply provide your desired location, type or popularity of parks, it will automatically returns parks that fit the profile")
 
-    st.write("-------------------------------------------------------------------------------------------------------")
-    
-    st.subheader("What is the motivation behind UNIROI?")
-    st.write("When it comes to pursuing a college degree, many prospective students don’t know exactly where to start."
-             " There are a lot of factors such as passion, strength, personality, tuition fee, debt after graduation, "
-             "etc,... to take into account when choosing a major and which college to go to.")
-    st.write("Many prospective students don’t have the privilege of having family members or someone they know that had such experiences to help "
-             "guide them. These students often fall into the groups of first generation college students and "
-             "underrepresented minorities.")
-    st.write("Additionally, American college graduates have an average of $30000 loan debt. "
-             "Some graduates may end up being in more debt due to the college they pick and/or the major they choose.")
-    st.write("We want to build a website that provides prospective college students an understanding of the finance "
-             "factor when it comes to getting a college degree, especially for helping first generation college students "
-             "and underrepresented minorities who don’t have much resources around them.")
     st.write("-------------------------------------------------------------------------------------------------------")
 
     st.subheader("How to use UNIROI?")
     st.write("Two main uses of UNIROI are:" )
-    st.write("- Searching for colleges/majors for finances information, which can be further explored by clicking 'University/Major Search' on the navigation bar.")
-    st.write("- Calculate the total time and money for repaying loan debt, which can be further explored by clicking 'Loan Repayment Calculator' on the navigation bar.")
+    st.write("- General Parks Searching. User can use the Park Searching page to search parks according to state, type and popularity.")
+    st.write("- Specific Park Searching. User can use the Park Detail Page to search for a specific park by the park name. The parks detailed information will show with top 5 recommendated parks according to the specific park's type and state.")
     st.write("-------------------------------------------------------------------------------------------------------")
 
-    st.write("This webpage platform were built by Duyen Nguyen, Kaiyin Chan and Jieni Yan.")
+    st.write("This webpage platform were built by Jieni Yan, Zihe Wang.")
 
 park_detail_in_page = False
 park_id = 0
@@ -312,9 +297,36 @@ if navi == "Parks Searching":
         else:
             df = pd.DataFrame(result.data())
             pie = pd.DataFrame(result_for_pie.data())
-            state_count = pie.State.value_counts()
-            type_count = pie.Type.value_counts()
-            popularity_count = pie.Popularity.value_counts()
+            state_count = pie.State.value_counts().to_frame()
+            type_count = pie.Type.value_counts().to_frame()
+            popularity_count = pie.Popularity.value_counts().to_frame()
+            state_count["State_name"] = state_count.index
+            type_count["Type_name"] = type_count.index
+            popularity_count["Popularity_name"] = popularity_count.index
+
+            state_counts = len(state_count["State_name"])
+            if state_counts > 15:
+                state_count.sort_values(by=['State'])
+                # state_count.drop(['California'])
+                new_state_df = state_count.iloc[:15]
+                others = state_count.iloc[15:]['State'].sum()
+                # st.write(others)
+                df2 = {'State': others, 'State_name': "Others"}
+                new_state_df = new_state_df.append(df2, ignore_index=True)
+                # new_state_df.loc[10] = ["Others", others]
+                state_count = new_state_df
+
+            type_counts = len(type_count["Type_name"])
+            if type_counts > 15:
+                type_count.sort_values(by=['Type'])
+                # state_count.drop(['California'])
+                new_type_df = type_count.iloc[:15]
+                others = type_count.iloc[15:]['Type'].sum()
+                df2 = {'Type': others, 'Type_name': "Others"}
+                new_type_df = new_type_df.append(df2, ignore_index=True)
+                # new_state_df.loc[10] = ["Others", others]
+                type_count = new_type_df
+
             # st.write(state_count[0])
             # states = list(state_count.index)
             # states_count = state_count[0]
@@ -344,11 +356,25 @@ if navi == "Parks Searching":
                     park_id = df['id'][x]
                     navi = "Park Detail"
 
-            # fig = px.pie(state_count, values='pop', names='country',
-            #              title='Population of American continent',
-            #              hover_data=['lifeExp'], labels={'lifeExp': 'life expectancy'})
-            # fig.update_traces(textposition='inside', textinfo='percent+label')
-            # fig.show()
+            # fig1, fig2 = st.columns(2)
+            # with col1:
+            st.subheader("Tie charts")
+            st.markdown(
+                "\n**If there are more than 15 states/types, we show the top 15 states/types with the highest number of parks. And count all other parks as Other**")
+
+            fig1 = px.pie(state_count, values='State', names='State_name',
+                     title='Distribution of Number of Parks in States')
+            st.plotly_chart(fig1, use_container_width=True)
+
+            fig2 = px.pie(type_count, values='Type', names='Type_name',
+                     title='Distribution of Number of Parks in Park Types')
+            st.plotly_chart(fig2, use_container_width=True)
+
+            fig3 = px.pie(popularity_count, values='Popularity', names='Popularity_name',
+                     title='Distribution of Number of Parks in Parks Popularity Type')
+            st.plotly_chart(fig3, use_container_width=True)
+
+
 
 park_names = ""
 # st.session_state['park'] = "Universal Studios Hollywood"
@@ -578,7 +604,7 @@ if navi == "Park Detail":
         st.subheader("Park Detail")
         st.write("Display specific park information you choose")
         park, location = st.columns((2, 1))
-        st.session_state
+        # st.session_state
         default_ix = park_name.index("Universal Studios Hollywood")
         if "park" in st.session_state.keys():
         # if park_names != "":
@@ -640,43 +666,50 @@ if navi == "Park Detail":
 
                 querystring = {"q": park_id_for_image, "pageNumber": "1", "pageSize": "1",
                                "autoCorrect": "true", "safeSearch": "true"}
+                # headers = {
+                #     "X-RapidAPI-Key": "0612a31a35msh7276860fbc7114ep107733jsne4e130ef1f10",
+                #     "X-RapidAPI-Host": "contextualwebsearch-websearch-v1.p.rapidapi.com"
+                # }
                 headers = {
-                    "X-RapidAPI-Key": "0612a31a35msh7276860fbc7114ep107733jsne4e130ef1f10",
+                    "X-RapidAPI-Key": "6413faf96dmsh87096ba0680cd11p152725jsn841c9233bace",
                     "X-RapidAPI-Host": "contextualwebsearch-websearch-v1.p.rapidapi.com"
                 }
 
-                # response = requests.request("GET", url, headers=headers, params=querystring)
-                # st.write(response.json())
-                # image_url = response.json()['value'][0]['url']
-                # st.image(image_url, width = 400)
+                response = requests.request("GET", url, headers=headers, params=querystring)
+                # st.write(len(response.json()))
+                if len(response.json()) != 1:
+                    image_url = response.json()['value'][0]['url']
+                    st.image(image_url, width = 400)
 
             st.subheader("Recommendation Amusement Parks: \n (same type, same state as the park you choose) ")
             more_parks = session.run(
                 f'''MATCH (park1:Park{{id: "{park_id_for_image}"}}) - [:has_type] ->(type:Type), (park1:Park) - [:in_state] -> (state:State), (park2:Park)-[:in_state]->(state),(park2) - [:has_type] ->(type), (park2)-[:has_popularity]->(popularity:Popularity) RETURN park2.name as Name, popularity.rank as Popularity, park2.adult as Adult_Price, park2.child as Child_Price ORDER BY toFloat(park2.popularity_score) DESC LIMIT 5''')
             more_parks_df = pd.DataFrame(more_parks.data())
             cols = st.columns((2, 2, 2, 2,1))
-
+            # st.write(more_parks_df)
             fields = ["Name", 'Popularity', 'Adult price', 'Child Price','Select']
             for col, field_name in zip(cols, fields):
                 col.write(field_name)
             button_flag = False
             park_name = ""
-            for x, name in enumerate(more_parks_df['Name']):
-                col1, col2, col3, col4, col5 = st.columns((2, 2, 2, 2,1))
-                col1.write(more_parks_df['Name'][x])  # email
-                col2.write(more_parks_df['Popularity'][x])
-                col3.write(more_parks_df['Adult_Price'][x])
-                col4.write(more_parks_df['Child_Price'][x])
+            if more_parks_df.shape[0] != 0:
+                for x, name in enumerate(more_parks_df['Name']):
+                    col1, col2, col3, col4, col5 = st.columns((2, 2, 2, 2,1))
+                    col1.write(more_parks_df['Name'][x])  # email
+                    col2.write(more_parks_df['Popularity'][x])
+                    col3.write(more_parks_df['Adult_Price'][x])
+                    col4.write(more_parks_df['Child_Price'][x])
 
-                button_hold = col5.empty()  # create a placeholder
-                do_action = button_hold.button("More", key=x)
-                # st.session_state['park'] = more_parks_df['Name'][x]
-                if do_action:
-                    # button_flag = True
-                    # park_detail_in_page = True
-                    st.write(more_parks_df['Name'][x])
-                    park_names = more_parks_df['Name'][x]
-                    st.session_state['park'] = more_parks_df['Name'][x]
+                    button_hold = col5.empty()  # create a placeholder
+                    do_action = button_hold.button("More", key=x)
+                    # st.session_state['park'] = more_parks_df['Name'][x]
+                    if do_action:
+                        # button_flag = True
+                        # park_detail_in_page = True
+                        # st.write(more_parks_df['Name'][x])
+                        park_names = more_parks_df['Name'][x]
+                        st.session_state['park'] = more_parks_df['Name'][x]
+                        # time.sleep(10)
                     # navi = "Park Detail"
 
             # st.dataframe(more_parks_df.style.hide_index())
